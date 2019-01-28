@@ -118,3 +118,8 @@ std::string SerialPortManage::SerialRead()
         return std::string(response);
     }
 }
+
+int SerialPortManage::GetSerialPortAddress(void)
+{
+  return fd;
+}
