@@ -67,7 +67,7 @@ void SerialPortManage::SerialWrite(const char *content)
     int n = write(fd, content, strlen(content));
 
     // Wait for the buffer to be sent completely
-    //usleep(100000);
+    // usleep(100000);
     // Remember to add the microsleep or the timer not inside the driver
     // but inside the user code if the write and the read are very close.
     // Better not to use the usleep inside the driver
@@ -86,7 +86,10 @@ void SerialPortManage::SerialWrite(const std::string &content)
     int n = write(fd, content.c_str(), content.size());
 
     // Wait for the buffer to be sent completely
-    usleep(100000);
+    // usleep(100000);
+    // Remember to add the microsleep or the timer not inside the driver
+    // but inside the user code if the write and the read are very close.
+    // Better not to use the usleep inside the driver
 
     // Check for wrote content
     if (n <= 0)
