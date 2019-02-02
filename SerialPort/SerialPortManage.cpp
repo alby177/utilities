@@ -12,7 +12,7 @@
 SerialPortManage::SerialPortManage(const char serialPortName[])
 {
     // Open serial port
-    fd = open(serialPortName, O_RDWR | O_NOCTTY);
+    fd = open(serialPortName, O_RDWR | O_NOCTTY | O_NONBLOCK);
 
     // Check for opened port
     if (fd < 0)
@@ -109,20 +109,13 @@ std::string SerialPortManage::SerialRead()
 
     // Check for errors
     if (n < 0)
-    {
-        std::cout << "Cannot read from serial port, error: " << strerror(errno) << std::endl;
-        exit(-1);
-    }
+        strcpy(response, "No data available");
 
     // Check for no character read
     else if (n == 0)
-        std::cout << "Nothing to read" << std::endl;
+        strcpy(response, "Nothing to read");
 
-    // Check for received characters
-    else if (n > 0)
-    {
-        return std::string(response);
-    }
+    return std::string(response);
 }
 
 int SerialPortManage::GetSerialPortAddress(void)
