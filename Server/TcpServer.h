@@ -17,17 +17,18 @@ private:
   std::string errString;
 
 public:
-  //std::ostream &operator << (std::ostream &out) {out << errString << ". With error code: " << errCode; return out;}
+  friend std::ostream &operator << (std::ostream &out, ErrorStruct &err) {out << err.errString; return out;}
   void operator << (const std::string in) {errString = in;}
   void operator << (const char *in) {errString = in;}
   void operator << (const ErrorCodes &in) {errCode = in;}
   void operator << (const int &in) {errCode = static_cast<ErrorCodes>(in);}
 };
 
+
 class TcpServer
 {
 public:
-  TcpServer(int port, ErrorStruct *err = nullptr, int maxClients = 5);
+  TcpServer(int port = 2000, ErrorStruct *err = nullptr, int maxClients = 5);
   ~TcpServer(){}
   int AddClient(void *clientFunction, void *clientData = nullptr);  // Run connected client code
   const inline int GetPortNumber() {return mPort;}  // Get port number

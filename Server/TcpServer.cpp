@@ -25,8 +25,8 @@ TcpServer::TcpServer(int port, ErrorStruct *err, int maxClients)
   // Set socket for binding already binded socket
   if(setsockopt(SOL_SOCKET, SO_REUSEADDR, SO_KEEPALIVE, &yes, sizeof(int)) < 0)
   {
-    // "Error setting socket settings" >> *err;
-    // *err << errCodSettings;
+    *err << "Error setting socket settings";
+    *err << errCodSettings;
   }
 
   // Set memory structure for TCP/IP connection
