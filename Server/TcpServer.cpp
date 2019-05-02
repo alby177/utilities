@@ -6,6 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <exception>
 
 TcpServer::TcpServer(int port, ErrorStruct *err, int maxClients)
 {
@@ -20,6 +21,7 @@ TcpServer::TcpServer(int port, ErrorStruct *err, int maxClients)
   {
     *err << "Error creating socket";
     *err << errCodCreate;
+		throw std::exception();
   }
 
   // Set socket for binding already binded socket
@@ -27,6 +29,7 @@ TcpServer::TcpServer(int port, ErrorStruct *err, int maxClients)
   {
     *err << "Error setting socket settings";
     *err << errCodSettings;
+		throw std::exception();
   }
 
   // Set memory structure for TCP/IP connection
@@ -40,6 +43,7 @@ TcpServer::TcpServer(int port, ErrorStruct *err, int maxClients)
   {
     *err << "Error binding socket" ;
     *err << errCodBind;
+		throw std::exception();
 	}
 
 	// Set socket to listen
@@ -47,5 +51,6 @@ TcpServer::TcpServer(int port, ErrorStruct *err, int maxClients)
   {
     *err << "Error listening from socket";
     *err << errCodListen;
+		throw std::exception();
   }
 }
