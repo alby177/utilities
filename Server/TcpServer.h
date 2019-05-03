@@ -17,7 +17,8 @@ private:
   std::string errString;
 
 public:
-  friend std::ostream &operator << (std::ostream &out, ErrorStruct &err) {out << err.errString; return out;}
+  friend std::ostream &operator << (std::ostream &out, ErrorStruct &err)
+    {out << err.errString + ". Error code: " + std::to_string(static_cast<int>(err.errCode)); return out;}
   void operator << (const std::string in) {errString = in;}
   void operator << (const char *in) {errString = in;}
   void operator << (const ErrorCodes &in) {errCode = in;}
@@ -30,7 +31,7 @@ class TcpServer
 public:
   TcpServer(int port = 2000, ErrorStruct *err = nullptr, int maxClients = 5);
   ~TcpServer(){}
-  int AddClient(void *clientFunction, void *clientData = nullptr);  // Run connected client code
+  int AddClient(void *clientFunction(), void *clientData = nullptr);  // Run connected client code
   const inline int GetPortNumber() {return mPort;}  // Get port number
 
 private:
