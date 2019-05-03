@@ -4,7 +4,7 @@
 
 enum ErrorCodes
 {
-  errCodCreate,               // Error creating socket
+  errCodCreate = 1000,        // Error creating socket
   errCodSettings,             // Error setting socket options
   errCodBind,                 // Error binding socket
   errCodListen,               // Error putting socket on listening
@@ -31,17 +31,21 @@ class TcpServer
 public:
   TcpServer(int port = 2000, ErrorStruct *err = nullptr, int maxClients = 5);
   ~TcpServer(){}
+  void CreateSocket();
   int AddClient(void *clientFunction(), void *clientData = nullptr);  // Run connected client code
   const inline int GetPortNumber() {return mPort;}  // Get port number
+  void Close();
 
 private:
   // Private methods
 
 
   // private members
-  int mPort = 0;            // Port number
-  int mServerSock = 0;      // Server socket descriptor
-  int mClientConnected = 0; // Number of conected clients
+  int           mPort               = 0;            // Port number
+  int           mServerSock         = 0;            // Server socket descriptor
+  int           mMaxClients         = 0;            // Maximum number of connectable clients
+  int           mClientConnected    = 0;            // Number of conected clients
+  ErrorStruct   *mErr                = nullptr;
 };
 
 #endif

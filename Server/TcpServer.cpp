@@ -10,25 +10,38 @@
 
 TcpServer::TcpServer(int port, ErrorStruct *err, int maxClients)
 {
-	struct sockaddr_in servaddr;
-  bool yes = true;
+	// Save user data
+	mPort = port;
+	mErr = err;
+	mMaxClients = maxClients;
+}
 
-  // Save port number
-  mPort = port;
+void TcpServer::CreateSocket()
+{
+	sockaddr_in servaddr;
+  bool yes = true;
 
   // Create socket
   if ((mServerSock = socket( AF_INET, SOCK_STREAM, 0)) < 0)
   {
-    *err << "Error creating socket";
-    *err << errCodCreate;
+		// Check for error structure pointer
+		if (mErr != nullptr)
+		{
+			*mErr << "Error creating socket";
+			*mErr << errCodSettings;
+		}
 		throw std::exception();
   }
 
   // Set socket for binding already binded socket
-  if(setsockopt(SOL_SOCKET, SO_REUSEADDR, SO_KEEPALIVE, &yes, sizeof(int)) < 0)
+  if(setsockopt(mServerSock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) < 0)
   {
-    *err << "Error setting socket settings";
-    *err << errCodSettings;
+		// Check for error structure pointer
+		if (mErr != nullptr)
+		{
+			*mErr << "Error setting socket settings";
+			*mErr << errCodSettings;
+		}
 		throw std::exception();
   }
 
@@ -39,18 +52,35 @@ TcpServer::TcpServer(int port, ErrorStruct *err, int maxClients)
 	servaddr.sin_port = htons(mPort);
 
 	// Bind created socket
-	if (bind(mServerSock, (struct sockaddr *) &servaddr, sizeof(servaddr)) < 0)
+	if (bind(mServerSock, reinterpret_cast<sockaddr *>(&servaddr), sizeof(servaddr)) < 0)
   {
-    *err << "Error binding socket" ;
-    *err << errCodBind;
+		// Check for error structure pointer
+		if (mErr != nullptr)
+		{
+			*mErr << "Error binding socket" ;
+			*mErr << errCodSettings;
+		}
 		throw std::exception();
 	}
 
 	// Set socket to listen
-	if (listen(mServerSock, maxClients) < 0)
+	if (listen(mServerSock, mMaxClients) < 0)
   {
-    *err << "Error listening from socket";
-    *err << errCodListen;
+		// Check for error structure pointer
+		if (mErr != nullptr)
+		{
+			*mErr << "Error listening from socket";
+			*mErr << errCodSettings;
+		}
 		throw std::exception();
   }
+}
+
+void TcpServer::Close()
+{
+	// Check for allocated server port
+	if (mServerSock != 0)
+
+		// Close server connection
+		close(mServerSock);
 }
