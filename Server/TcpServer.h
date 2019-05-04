@@ -35,10 +35,13 @@ public:
   void CreateSocket();
   void AddClientFunction(void (*clientFunction)(), void *clientData = nullptr);  // Run connected client code
   const inline int GetPortNumber() {return mPort;}  // Get port number
+  void StopServer();
+  void WaitForServerEnd();
   void Close();
 
 private:
   // Private methods
+  void RunServer(void (*clientFunction)(), void *clientData = nullptr);
   void RunClient(void (*clientFunction)(), void *clientData = nullptr);
 
   // private members
@@ -46,8 +49,10 @@ private:
   int               mServerSock         = 0;            // Server socket descriptor
   int               mMaxClients         = 0;            // Maximum number of connectable clients
   int               mClientConnected    = 0;            // Number of conected clients
-  std::mutex        mLock;
-  ErrorStruct       *mErr                = nullptr;
+  bool              mServerRunning      = false;        // Flag indicating if the server is running
+  bool              mStopServer         = false;        // Flag for server exection termination
+  std::mutex        mLock;                              // Mutex for preventing acces to variable containing the number of clients running
+  ErrorStruct       *mErr               = nullptr;      // Occurred error saving structure
 };
 
 #endif

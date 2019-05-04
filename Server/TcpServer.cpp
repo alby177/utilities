@@ -7,11 +7,7 @@
 #include <unistd.h>
 #include <exception>
 #include <thread>
-
-
-
-#include <chrono>
-#include <iostream>
+#include <vector>
 
 TcpServer::TcpServer(int port, ErrorStruct *err, int maxClients)
 {
@@ -83,34 +79,100 @@ void TcpServer::CreateSocket()
 
 void TcpServer::AddClientFunction(void (*clientFunction)(), void *clientData)
 {
+	// Set server running flag
+	mServerRunning = true;
+
 	// Run client function inside a thread
-	std::thread t1(&TcpServer::RunClient, this, clientFunction, clientData);
+	std::thread t1(&TcpServer::RunServer, this, clientFunction, clientData);
 	t1.detach();
+}
+
+void TcpServer::RunServer(void (*clientFunction)(), void *clientData)
+{
+	int clientSock, clientStructSize = 0;
+	sockaddr_in cliaddr;
+	std::vector<std::thread> threadsVector;
+
+	// Check for authorization to run
+	while(mStopServer == false)
+	{
+		// Check for maximum number of clients
+		if (mClientConnected < mMaxClients)
+		{
+			// Get client struct size
+			clientStructSize = sizeof(cliaddr);
+
+			// Accept client connection
+			clientSock = accept(mServerSock, reinterpret_cast<sockaddr *>(&cliaddr), &clientStructSize);
+
+			// Check for client connection error
+			if( clientSock < 0)
+			{
+				*mErr << "Error accepting client connection";
+			}
+			else
+			{
+				// Create thread
+				threadsVector.push_back(std::thread(&TcpServer::RunClient, this, clientFunction, (void*)&clientSock));
+
+				// Lock access to common resource
+				mLock.lock();
+
+				// Increase connected thread number
+				mClientConnected++;
+
+				// Unlock access to common resource
+				mLock.unlock();
+			}
+		}
+	}
+
+	// Synchronize threads
+	for (auto &i: threadsVector)
+		i.join();
+
+	// Remove all threads
+	threadsVector.clear();
+
+	// Set server execution end flag
+	mServerRunning = false;
+
+	// Reset execution stop flags
+	mStopServer = false;
 }
 
 void TcpServer::RunClient(void (*clientFunction)(), void *clientData)
 {
-	int clientSock, clientStructSize = 0;
-	sockaddr_in cliaddr;
+	// TO BE REMOVED
+	// Send message to client
+	char msgSending[20] = "Communicating";
+	size_t byteSent = send(*(int*)clientData, &msgSending, strlen(msgSending) + 1, 0);
 
-	while(true)
-	{
+	// Run client function
+	while(mStopServer == false)
 		clientFunction();
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-		// // Check for maximum number of clients
-		// if (mClientConnected < mMaxClients)
-		// {
-		// 	// Get client struct size
-		// 	clientStructSize = sizeof(cliaddr);
-		//
-		// 	// Accept client connection
-		// 	clientSock = accept(mServerSock, reinterpret_cast<sockaddr *>(&cliaddr), &clientStructSize);
-		//
-		//
-		// }
-	}
+
+	// Lock access to common resource
+	mLock.lock();
+
+	// Increase connected thread number
+	mClientConnected--;
+
+	// Unlock access to common resource
+	mLock.unlock();
 }
 
+void TcpServer::StopServer()
+{
+	// Set execution stop flags
+	mStopServer = true;
+}
+
+void TcpServer::WaitForServerEnd()
+{
+	// Wait server to finish execution
+	while(mServerRunning == true);
+}
 
 void TcpServer::Close()
 {
