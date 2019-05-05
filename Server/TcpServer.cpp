@@ -9,6 +9,8 @@
 #include <thread>
 #include <vector>
 
+#include <iostream>
+
 TcpServer::TcpServer(int port, ErrorStruct *err, int maxClients)
 {
 	// Save user data
@@ -89,7 +91,8 @@ void TcpServer::AddClientFunction(void (*clientFunction)(), void *clientData)
 
 void TcpServer::RunServer(void (*clientFunction)(), void *clientData)
 {
-	int clientSock, clientStructSize = 0;
+	int clientSock;
+	socklen_t clientStructSize;
 	sockaddr_in cliaddr;
 	std::vector<std::thread> threadsVector;
 
