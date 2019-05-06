@@ -1,6 +1,5 @@
 #include "TcpServer.h"
 #include <sys/socket.h>
-#include <arpa/inet.h>
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
@@ -79,7 +78,7 @@ void TcpServer::CreateSocket()
   }
 }
 
-void TcpServer::AddClientFunction(void (*clientFunction)(), void *clientData)
+void TcpServer::AddClientFunction(void (*clientFunction)(ServerStruct *serverStruct), void *clientData)
 {
 	// Set server running flag
 	mServerRunning = true;
@@ -89,7 +88,7 @@ void TcpServer::AddClientFunction(void (*clientFunction)(), void *clientData)
 	t1.detach();
 }
 
-void TcpServer::RunServer(void (*clientFunction)(), void *clientData)
+void TcpServer::RunServer(void (*clientFunction)(ServerStruct *serverStruct), void *clientData)
 {
 	int clientSock;
 	socklen_t clientStructSize;
@@ -115,8 +114,14 @@ void TcpServer::RunServer(void (*clientFunction)(), void *clientData)
 			}
 			else
 			{
+				// Populate server data struct
+				ServerStruct *serverData = new ServerStruct;
+				serverData->clientData = cliaddr;
+				serverData->clientSock = clientSock;
+				serverData->userData = clientData;
+
 				// Create thread
-				threadsVector.push_back(std::thread(&TcpServer::RunClient, this, clientFunction, (void*)&clientSock));
+				threadsVector.push_back(std::thread(&TcpServer::RunClient, this, clientFunction, serverData));
 
 				// Lock access to common resource
 				mLock.lock();
@@ -144,16 +149,19 @@ void TcpServer::RunServer(void (*clientFunction)(), void *clientData)
 	mStopServer = false;
 }
 
-void TcpServer::RunClient(void (*clientFunction)(), void *clientData)
+void TcpServer::RunClient(void (*clientFunction)(ServerStruct *serverStruct), ServerStruct *serverData)
 {
 	// TO BE REMOVED
 	// Send message to client
-	char msgSending[20] = "Communicating";
-	size_t byteSent = send(*(int*)clientData, &msgSending, strlen(msgSending) + 1, 0);
+	// char msgSending[20] = "Communicating";
+	// size_t byteSent = send(*(int*)clientData, &msgSending, strlen(msgSending) + 1, 0);
 
 	// Run client function
 	while(mStopServer == false)
-		clientFunction();
+		clientFunction(serverData);
+
+	// Clean server data structure
+	delete serverData;
 
 	// Lock access to common resource
 	mLock.lock();

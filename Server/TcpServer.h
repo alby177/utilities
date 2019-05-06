@@ -2,6 +2,7 @@
 #define TCPSERVER_H
 #include <string>
 #include <mutex>
+#include <arpa/inet.h>
 
 enum ErrorCodes
 {
@@ -13,10 +14,6 @@ enum ErrorCodes
 
 struct ErrorStruct
 {
-private:
-  ErrorCodes errCode;
-  std::string errString;
-
 public:
   friend std::ostream &operator << (std::ostream &out, ErrorStruct &err)
     {out << err.errString + ". Error code: " + std::to_string(static_cast<int>(err.errCode)); return out;}
@@ -24,8 +21,19 @@ public:
   void operator << (const char *in) {errString = in;}
   void operator << (const ErrorCodes &in) {errCode = in;}
   void operator << (const int &in) {errCode = static_cast<ErrorCodes>(in);}
+
+private:
+  ErrorCodes errCode;
+  std::string errString;
 };
 
+struct ServerStruct
+{
+public:
+  sockaddr_in         clientData;                    // IP client data
+  int                 clientSock;                    // Client socket address
+  void const          *userData;                      // Data provided by the user
+};
 
 class TcpServer
 {
@@ -33,7 +41,7 @@ public:
   TcpServer(int port = 2000, ErrorStruct *err = nullptr, int maxClients = 5);
   ~TcpServer(){}
   void CreateSocket();
-  void AddClientFunction(void (*clientFunction)(), void *clientData = nullptr);  // Run connected client code
+  void AddClientFunction(void (*clientFunction)(ServerStruct *serverStruct), void *clientData = nullptr);  // Run connected client code
   const inline int GetPortNumber() {return mPort;}  // Get port number
   void StopServer();
   void WaitForServerEnd();
@@ -41,8 +49,8 @@ public:
 
 private:
   // Private methods
-  void RunServer(void (*clientFunction)(), void *clientData = nullptr);
-  void RunClient(void (*clientFunction)(), void *clientData = nullptr);
+  void RunServer(void (*clientFunction)(ServerStruct *serverStruct), void *clientData = nullptr);
+  void RunClient(void (*clientFunction)(ServerStruct *serverStruct), ServerStruct *serverData = nullptr);
 
   // private members
   int               mPort               = 0;            // Port number
