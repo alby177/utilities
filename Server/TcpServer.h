@@ -47,6 +47,10 @@ public:
   void WaitForServerEnd();
   void Close();
 
+  // Static funtion declaration
+  static size_t Send(ServerStruct *serverStruct, const std::string &message);
+  static size_t Receive(ServerStruct *serverStruct, std::string &message);
+
 private:
   // Private methods
   void RunServer(void (*clientFunction)(ServerStruct *serverStruct), void *clientData = nullptr);

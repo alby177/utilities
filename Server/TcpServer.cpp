@@ -151,11 +151,6 @@ void TcpServer::RunServer(void (*clientFunction)(ServerStruct *serverStruct), vo
 
 void TcpServer::RunClient(void (*clientFunction)(ServerStruct *serverStruct), ServerStruct *serverData)
 {
-	// TO BE REMOVED
-	// Send message to client
-	// char msgSending[20] = "Communicating";
-	// size_t byteSent = send(*(int*)clientData, &msgSending, strlen(msgSending) + 1, 0);
-
 	// Run client function
 	while(mStopServer == false)
 		clientFunction(serverData);
@@ -192,4 +187,25 @@ void TcpServer::Close()
 
 		// Close server connection
 		close(mServerSock);
+}
+
+size_t TcpServer::Send(ServerStruct *serverStruct, const std::string &message)
+{
+	// Send message to client
+	size_t byteSent = send(serverStruct->clientSock, message.c_str(), message.size(), 0);
+	return byteSent;
+}
+
+size_t TcpServer::Receive(ServerStruct *serverStruct, std::string &message)
+{
+	char mess[500];
+
+	// Receive message from client
+	size_t received = recv(serverStruct->clientSock, mess, sizeof(mess), 0);
+
+	// Save received data
+	message = mess;
+
+	// Save received data
+	return received;
 }
