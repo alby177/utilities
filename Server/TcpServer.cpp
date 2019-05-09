@@ -78,17 +78,17 @@ void TcpServer::CreateSocket()
   }
 }
 
-void TcpServer::AddClientFunction(void (*clientFunction)(ServerStruct *serverStruct), void *clientData)
+void TcpServer::AddClientFunction(void (*clientFunction)(ServerStruct *serverStruct), void *clientData, const bool &oneCycle)
 {
 	// Set server running flag
 	mServerRunning = true;
 
 	// Run client function inside a thread
-	std::thread t1(&TcpServer::RunServer, this, clientFunction, clientData);
+	std::thread t1(&TcpServer::RunServer, this, clientFunction, clientData, oneCycle);
 	t1.detach();
 }
 
-void TcpServer::RunServer(void (*clientFunction)(ServerStruct *serverStruct), void *clientData)
+void TcpServer::RunServer(void (*clientFunction)(ServerStruct *serverStruct), void *clientData, const bool &oneCycle)
 {
 	int clientSock;
 	socklen_t clientStructSize;
@@ -121,7 +121,7 @@ void TcpServer::RunServer(void (*clientFunction)(ServerStruct *serverStruct), vo
 				serverData->userData = clientData;
 
 				// Create thread
-				threadsVector.push_back(std::thread(&TcpServer::RunClient, this, clientFunction, serverData));
+				threadsVector.push_back(std::thread(&TcpServer::RunClient, this, clientFunction, serverData, oneCycle));
 
 				// Lock access to common resource
 				mLock.lock();
@@ -149,11 +149,12 @@ void TcpServer::RunServer(void (*clientFunction)(ServerStruct *serverStruct), vo
 	mStopServer = false;
 }
 
-void TcpServer::RunClient(void (*clientFunction)(ServerStruct *serverStruct), ServerStruct *serverData)
+void TcpServer::RunClient(void (*clientFunction)(ServerStruct *serverStruct), ServerStruct *serverData, const bool &oneCycle)
 {
 	// Run client function
-	while(mStopServer == false)
+	do {
 		clientFunction(serverData);
+	} while((mStopServer == false) && (oneCycle == false));
 
 	// Clean server data structure
 	delete serverData;

@@ -41,7 +41,7 @@ public:
   TcpServer(int port = 2000, ErrorStruct *err = nullptr, int maxClients = 5);
   ~TcpServer(){}
   void CreateSocket();
-  void AddClientFunction(void (*clientFunction)(ServerStruct *serverStruct), void *clientData = nullptr);  // Run connected client code
+  void AddClientFunction(void (*clientFunction)(ServerStruct *serverStruct), void *clientData = nullptr, const bool &oneCycle = false);  // Run connected client code
   const inline int GetPortNumber() {return mPort;}  // Get port number
   void StopServer();
   void WaitForServerEnd();
@@ -53,8 +53,8 @@ public:
 
 private:
   // Private methods
-  void RunServer(void (*clientFunction)(ServerStruct *serverStruct), void *clientData = nullptr);
-  void RunClient(void (*clientFunction)(ServerStruct *serverStruct), ServerStruct *serverData = nullptr);
+  void RunServer(void (*clientFunction)(ServerStruct *serverStruct), void *clientData = nullptr, const bool &oneCycle = false);
+  void RunClient(void (*clientFunction)(ServerStruct *serverStruct), ServerStruct *serverData = nullptr, const bool &oneCycle = false);
 
   // private members
   int               mPort               = 0;            // Port number
