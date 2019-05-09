@@ -45,7 +45,6 @@ public:
   const inline int GetPortNumber() {return mPort;}  // Get port number
   void StopServer();
   void WaitForServerEnd();
-  void Close();
 
   // Static funtion declaration
   static size_t Send(ServerStruct *serverStruct, const std::string &message);
@@ -55,6 +54,7 @@ private:
   // Private methods
   void RunServer(void (*clientFunction)(ServerStruct *serverStruct), void *clientData = nullptr, const bool &oneCycle = false);
   void RunClient(void (*clientFunction)(ServerStruct *serverStruct), ServerStruct *serverData = nullptr, const bool &oneCycle = false);
+  void Close();
 
   // private members
   int               mPort               = 0;            // Port number
