@@ -178,7 +178,10 @@ void TcpServer::StopServer()
 void TcpServer::WaitForServerEnd()
 {
 	// Wait server to finish execution
-	while(mServerRunning == true);
+	while(mServerRunning == true)
+	{
+		std::this_thread::sleep_for(std::chrono::milliseconds(50));
+	}
 }
 
 void TcpServer::Close()

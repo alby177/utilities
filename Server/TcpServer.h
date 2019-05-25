@@ -57,14 +57,14 @@ private:
   void Close();
 
   // private members
-  int               mPort               = 0;            // Port number
-  int               mServerSock         = 0;            // Server socket descriptor
-  int               mMaxClients         = 0;            // Maximum number of connectable clients
-  int               mClientConnected    = 0;            // Number of conected clients
-  bool              mServerRunning      = false;        // Flag indicating if the server is running
-  bool              mStopServer         = false;        // Flag for server exection termination
+  int               mPort               {0};            // Port number
+  int               mServerSock         {0};            // Server socket descriptor
+  int               mMaxClients         {0};            // Maximum number of connectable clients
+  int               mClientConnected    {0};            // Number of conected clients
+  bool              mServerRunning      {false};        // Flag indicating if the server is running
+  bool              mStopServer         {false};        // Flag for server exection termination
   std::mutex        mLock;                              // Mutex for preventing acces to variable containing the number of clients running
-  ErrorStruct       *mErr               = nullptr;      // Occurred error saving structure
+  ErrorStruct       *mErr               {nullptr};      // Occurred error saving structure
 };
 
 #endif
